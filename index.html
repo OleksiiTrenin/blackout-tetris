@@ -282,7 +282,7 @@ img{max-width:100%}
 (()=>{
 // ===== Telegram Mini App =====
 // ВСТАВ СЮДИ посилання на свою гру в боті (з BotFather), напр. https://t.me/blackout_tetris_bot/play
-const BOT_LINK='https://t.me/YOUR_BOT/play';
+const BOT_LINK='https://t.me/blackout_tetris_bot/play';
 const TG=window.Telegram&&window.Telegram.WebApp;const inTG=!!(TG&&TG.initData);
 if(inTG){try{TG.ready();TG.expand();TG.disableVerticalSwipes&&TG.disableVerticalSwipes();TG.setHeaderColor&&TG.setHeaderColor('#ffffff');TG.setBackgroundColor&&TG.setBackgroundColor('#ffffff')}catch(e){}}
 function hap(t,s){if(!inTG)return;try{const h=TG.HapticFeedback;t==='n'?h.notificationOccurred(s):t==='s'?h.selectionChanged():h.impactOccurred(s)}catch(e){}}
