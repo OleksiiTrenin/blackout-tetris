@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=JetBrains+Mono:wght@400;700&display=swap">
 <style>
-/* Layout: schedule-grid board (hours × groups) on the left, stats on the right; stacks on phones */
 :root{
   --bg:#ffffff; --panel:#fffbea; --line:#f1e3a6; --fg:#1d1b14; --muted:#8a8166;
   --volt:#ffc800; --volt-deep:#e0a800; --dark:#2b2a31;
@@ -106,7 +105,6 @@ body{overflow-x:hidden}
 *{box-sizing:border-box}
 body{margin:0;font-size:14px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;padding-top:max(16px,env(safe-area-inset-top,0px))!important}
 img{max-width:100%}
-/* ===== Phone layout (≤700px): everything on one screen, no scroll ===== */
 .hud,.bub,.ticker{display:none}
 .stage{width:100%}
 @media (max-width:700px){
@@ -117,12 +115,10 @@ img{max-width:100%}
   .wrap{height:100%;gap:0}
   .game{flex:1;min-height:0;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:0}
   .col{width:100%;flex:1;min-height:0;gap:6px}
-  /* stage = free space between HUD and pad; board keeps 356:658 inside it */
   .stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
   .boardbox{flex:none;width:min(100%,calc((var(--tg-viewport-stable-height,100dvh) - 140px) * 356 / 658));width:min(100cqw,100cqh * 356 / 658);box-shadow:0 6px 24px #e0a80033;container:board/size}
   canvas#board{touch-action:none}
 
-  /* compact one-row HUD */
   .hud{display:flex;align-items:center;gap:6px;width:100%;flex:none;position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 6px 9px 10px;transition:filter .5s}
   .hs{flex:1 1 0;min-width:0;line-height:1.1}
   .hs.sc{flex-grow:1.6}
@@ -138,13 +134,11 @@ img{max-width:100%}
   .hud.crit .hmeter i{background:linear-gradient(90deg,#f97316,#ef4444);animation:blink .6s steps(1) infinite}
   .blackout .hud{filter:brightness(.25) saturate(.3);transition:filter .08s}
 
-  /* touch pad */
   .pad{display:flex;gap:6px;flex:none}
   .pad button{max-width:none;aspect-ratio:auto;height:clamp(44px,7vh,54px);font-size:18px;border-radius:12px;box-shadow:0 3px 0 var(--fg)}
 
   .toast{left:6px;right:6px;top:6px;font-size:11px;padding:6px 8px}
 
-  /* overlays fit inside the board */
   .overlay{padding:10px}
   .scr{gap:10px}
   @container board (max-height:640px){
@@ -163,7 +157,6 @@ img{max-width:100%}
     .bigscore{font-size:28px}
   }
 
-  /* comments strip between HUD and board: one comment at a time, never covers the field */
   .ticker{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;width:100%;position:relative;height:44px;padding:0 12px;border:1.5px dashed var(--line);border-radius:10px;background:#fff;overflow:hidden;
     font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:filter .5s}
   .blackout .ticker{filter:brightness(.25) saturate(.3);transition:filter .08s}
@@ -279,8 +272,6 @@ img{max-width:100%}
 
 <script>
 (()=>{
-// ===== Telegram Mini App =====
-// ВСТАВ СЮДИ посилання на свою гру в боті (з BotFather), напр. https://t.me/blackout_tetris_bot/play
 const BOT_LINK='https://t.me/blackout_tetris_bot/play';
 const TG=window.Telegram&&window.Telegram.WebApp;const inTG=!!(TG&&TG.initData);
 if(inTG){try{TG.ready();TG.expand();TG.disableVerticalSwipes&&TG.disableVerticalSwipes();TG.setHeaderColor&&TG.setHeaderColor('#ffffff');TG.setBackgroundColor&&TG.setBackgroundColor('#ffffff')}catch(e){}}
@@ -303,7 +294,6 @@ function drawParts(){parts=parts.filter(p=>p.l>0);parts.forEach(p=>{p.x+=p.vx;p.
 let boom=null,boomTimer=18000;
 let strike=null,deadDark=false,rings=[],AC=null,muted=false;
 try{muted=localStorage.getItem('blackout-mute')==='1'}catch(e){}
-// ---- sound (WebAudio, synthesized)
 function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume()}
 function boomSnd(p=1){if(!AC||muted)return;const t=AC.currentTime,d=1+p*.5,b=AC.createBuffer(1,AC.sampleRate*d|0,AC.sampleRate),a=b.getChannelData(0);
   for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*Math.pow(1-i/a.length,2.5);
@@ -325,7 +315,6 @@ function chime(){hap('n','success');if(!AC||muted)return;const t=AC.currentTime;
   g.gain.setValueAtTime(.0001,t+i*.09);g.gain.exponentialRampToValueAtTime(.1,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(.001,t+i*.09+.35);
   o.connect(g).connect(AC.destination);o.start(t+i*.09);o.stop(t+i*.09+.4)})}
 
-// ---- fx helpers
 function ring(x,y,max,col,w){rings.push({x,y,t0:performance.now(),max,col,w})}
 function drawRings(){const now=performance.now();rings=rings.filter(r=>now-r.t0<700);
   rings.forEach(r=>{const k=(now-r.t0)/700;ctx.strokeStyle=r.col;ctx.globalAlpha=1-k;ctx.lineWidth=r.w*(1-k)+1;ctx.beginPath();ctx.arc(r.x,r.y,8+k*r.max,0,7);ctx.stroke()});ctx.globalAlpha=1}
@@ -347,8 +336,6 @@ function burst(x,y,p){hap('i','heavy');
   ring(x,y,150*p,'#fff3b0',10);ring(x,y,95*p,'#ff8a00',6);boomSnd(p);quake(250+p*150);
 }
 
-// ---- ballistic strike
-// ---- strike adds outages to both subgroups of one queue
 function onPiece(r,c){if(!cur)return false;const y=r-cur.y,x=c-cur.x;return y>=0&&y<cur.m.length&&x>=0&&x<cur.m[0].length&&!!cur.m[y][x]}
 function clearFull(){const full=[];board.forEach((row,i)=>{if(row.every(Boolean))full.push(i)});if(!full.length)return;full.forEach(sparks);full.forEach(i=>{board.splice(i,1);board.unshift(Array(COLS).fill(0))});lines+=full.length;score+=100*full.length*level}
 function addOutage(c){
@@ -401,7 +388,6 @@ function drawStrike(){
   if(e>=S_T2){const sc=strike.c;strike=null;document.body.classList.remove('alarm');triggerBoom(x,y,2.4);if(running&&!over)addOutage(sc)}
 }
 
-// ---- explosions
 function triggerBoom(x,y,p=1,mega=false){
   if(x===undefined){const c=Math.random()*COLS|0,r=6+Math.random()*14|0;x=LG+c*C+C/2;y=TOP+r*C+C/2}
   boom={t0:performance.now(),x,y,p,mega};shake=mega?10:20*p;
@@ -486,7 +472,6 @@ function rotate(){if(!running||paused)return;hap('s');const m=rot(cur.m);for(con
 function soft(){if(!running||paused)return;if(fits(cur.m,cur.x,cur.y+1)){cur.y++;score+=1;$('score').textContent=score;$('hScore').textContent=score}else lock();acc=0}
 function hard(){if(!running||paused)return;hap('i','medium');let d=0;while(fits(cur.m,cur.x,cur.y+1)){cur.y++;d++}score+=d*2;lock();acc=0}
 
-// ---- drawing
 function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
 function bulb(c,x,y,s,t){
   const cx=x+s/2,cy=y+s*.42,r=s*.22;
@@ -509,10 +494,8 @@ function draw(){
   const t=(Math.sin(performance.now()/400)+1)/2;
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
   ctx.save();if(shake>0){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.86;if(shake<.5)shake=0}
-  // top header
   ctx.fillStyle='#8a8166';ctx.font='700 10px JetBrains Mono, monospace';ctx.textBaseline='middle';ctx.textAlign='left';
   ctx.fillText('ГОДИНИ',4,TOP/2);ctx.textAlign='center';ctx.fillText('ЛЬВІВ · '+new Date().toTimeString().slice(0,5)+' · РАХУНОК '+score+' · РІВ. '+level,LG+COLS*C/2,TOP/2);
-  // grid
   for(let r=0;r<ROWS;r++){
     const y=TOP+r*C;
     if(r%2===0){ctx.fillStyle='#fffbea';ctx.fillRect(LG,y,COLS*C,C)}
@@ -530,7 +513,6 @@ function draw(){
     cur.m.forEach((row,r)=>row.forEach((v,c)=>{if(v&&gy+r>=0)block(ctx,LG+(cur.x+c)*C,TOP+(gy+r)*C,C,true)}));
     cur.m.forEach((row,r)=>row.forEach((v,c)=>{if(v&&cur.y+r>=0)block(ctx,LG+(cur.x+c)*C,TOP+(cur.y+r)*C,C)}));
   }
-  // group labels at bottom
   const by=TOP+ROWS*C;ctx.fillStyle='#ffc800';ctx.fillRect(LG,by,COLS*C,BOT);
   const cnt=colCounts();
   for(let c=0;c<COLS;c++){
@@ -566,7 +548,6 @@ function updateUI(){
 }
 let tt;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),1800)}
 
-// ---- angry comments feed
 const NAMES=['Оксана з Сихова','Тарас_Левандівка','пан Ігор','Марічка','Богдан з Рясного','Зеник','Христя Личаків','Андрій 🔋','Ірина Збоїща','Остап','Галина Петрівна','Юрко з Кульпаркова','Соломія','Василь_Підзамче','Наталка'];
 const AV=['#ef4444','#f97316','#8b5cf6','#0ea5e9','#10b981','#e11d48','#6366f1','#d97706'];
 const ANGRY=[
@@ -629,7 +610,6 @@ function post(kind,h){
   f.prepend(el);while(f.children.length>8)f.lastChild.remove();
   bubble(el,kind==='tick'?0:1);
 }
-// ---- phone: comments appear one at a time in the strip above the board
 const PHONE=matchMedia('(max-width:700px)');let bq=[],bBusy=false;
 function bubble(el,prio){
   if(!PHONE.matches||!$('overlay').hidden)return;
@@ -686,13 +666,12 @@ function hold(id,fn,rep){const b=$(id);let iv,to;const stop=()=>{clearTimeout(to
   b.addEventListener('pointerdown',e=>{e.preventDefault();fn();if(rep)to=setTimeout(()=>iv=setInterval(fn,50),160)});
   ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop))}
 hold('bL',()=>move(-1),1);hold('bRt',()=>move(1),1);hold('bD',soft,1);hold('bR',rotate,0);hold('bH',hard,0);
-// ---- touch gestures on the board: drag left/right = move by cells, tap = rotate, swipe down = hard drop
 {let g=null;
  cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||!running||paused)return;e.preventDefault();
    g={id:e.pointerId,x0:e.clientX,y0:e.clientY,lx:e.clientX,t0:performance.now(),moved:false};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
  cv.addEventListener('pointermove',e=>{if(!g||e.pointerId!==g.id)return;
    const cell=cv.getBoundingClientRect().width*C/W;let dx=e.clientX-g.lx;
-   if(!g.moved&&Math.abs(e.clientY-g.y0)>Math.abs(e.clientX-g.x0)*1.5)return; // vertical swipe in progress
+   if(!g.moved&&Math.abs(e.clientY-g.y0)>Math.abs(e.clientX-g.x0)*1.5)return;
    while(Math.abs(dx)>=cell){const s=Math.sign(dx);move(s);g.lx+=s*cell;dx=e.clientX-g.lx;g.moved=true}});
  const end=e=>{if(!g||e.pointerId!==g.id)return;const dx=e.clientX-g.x0,dy=e.clientY-g.y0,dt=performance.now()-g.t0,moved=g.moved;g=null;
    if(e.type==='pointercancel')return;
@@ -703,7 +682,6 @@ hold('bL',()=>move(-1),1);hold('bRt',()=>move(1),1);hold('bD',soft,1);hold('bR',
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running&&!paused)togglePause()});
 
 reset();
-// demo outages on the start screen
 [[23,[1,1,0,1,1,1,0,1,1,1,1,0]],[22,[1,0,0,1,1,0,0,0,1,1,0,0]],[21,[0,0,0,0,1,0,0,0,0,1,0,0]]].forEach(([r,row])=>board[r]=row);
 updateUI();post('tick');post('tick');requestAnimationFrame(loop);
 })();
